@@ -10,14 +10,14 @@ try {
     $resource = '/resource:' + (Join-Path $PSScriptRoot 'app.ico') + ',Connector.ico'
     if ($Audit) {
         $auditPath = Join-Path $PSScriptRoot 'audit\Audit.exe'
-        & $compiler /nologo /target:exe /main:AuditRunner /optimize+ /utf8output $resource ('/out:' + $auditPath) @references @sources (Join-Path $PSScriptRoot 'audit\AuditRunner.cs')
+        & $compiler /nologo /target:exe /main:AuditRunner /optimize+ /utf8output /codepage:65001 $resource ('/out:' + $auditPath) @references @sources (Join-Path $PSScriptRoot 'audit\AuditRunner.cs')
         if ($LASTEXITCODE -ne 0) { throw 'Audit build failed.' }
         & $auditPath
         if ($LASTEXITCODE -ne 0) { throw 'Audit tests failed.' }
     }
     $outputPath = [IO.Path]::GetFullPath($Destination)
     New-Item -ItemType Directory -Path (Split-Path -Parent $outputPath) -Force | Out-Null
-    & $compiler /nologo /target:winexe /optimize+ /utf8output ('/win32icon:' + (Join-Path $PSScriptRoot 'app.ico')) $resource ('/out:' + $outputPath) @references @sources
+    & $compiler /nologo /target:winexe /optimize+ /utf8output /codepage:65001 ('/win32icon:' + (Join-Path $PSScriptRoot 'app.ico')) $resource ('/out:' + $outputPath) @references @sources
     if ($LASTEXITCODE -ne 0) { throw 'Application build failed.' }
     Write-Output ('Built: ' + $outputPath)
 } finally { Pop-Location }

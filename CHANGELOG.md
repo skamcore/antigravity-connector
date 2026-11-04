@@ -1,5 +1,9 @@
 # Changelog / История изменений
 
+## 0.1.9 — 2026-11-04
+
+- Explicit UTF-8 input encoding for the Framework compiler, fixing builds on non-Russian Windows. / Явная кодировка UTF-8 для компилятора Framework: исправлена сборка в Windows с другой системной кодировкой.
+
 ## 0.1.8 — 2026-11-04
 
 - Added subtle **by skam** attribution. / Добавлена небольшая подпись **by skam**.

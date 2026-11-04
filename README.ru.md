@@ -1,6 +1,6 @@
 # Antigravity Connector
 
-**by skam** · Windows · RU / EN · v0.1.8
+**by skam** · Windows · RU / EN · v0.1.9
 
 [English](README.md) · [Руководство пользователя](docs/manual.ru.md) · [Архитектура и разработка](docs/development.ru.md)
 
