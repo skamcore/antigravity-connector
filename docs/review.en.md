@@ -1,5 +1,7 @@
 # Release review — v0.1.8
 
+Follow-up v0.1.9: clean English Windows CI exposed a Cyrillic shortcut save failure in WScript.Shell. Shortcut.cs now uses Unicode IShellLinkW/IPersistFile; the Cyrillic filename regression test remains enabled. UTF-8 compiler input is explicit. One local relay test timed out transiently during repeated runs; the subsequent full audit passed. This transient is not evidence of universal network reliability.
+
 Date: 2026-11-04. Scope: C# source, installer, network relay, translations, tests, build script and publication contents. This is a code review and regression check, not a guarantee of defect-free software or a security certification.
 
 ## Fixed in this review

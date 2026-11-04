@@ -5,7 +5,7 @@ $compiler = Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
 if (!(Test-Path -LiteralPath $compiler)) { throw 'C# compiler not found.' }
 Push-Location $projectRoot
 try {
-    $sources = @('Core.cs', 'App.cs', 'UI.cs', 'I18n.cs', 'Tests.cs', 'AssemblyInfo.cs') | ForEach-Object { Join-Path $PSScriptRoot $_ }
+    $sources = @('Core.cs', 'App.cs', 'Shortcut.cs', 'UI.cs', 'I18n.cs', 'Tests.cs', 'AssemblyInfo.cs') | ForEach-Object { Join-Path $PSScriptRoot $_ }
     $references = @('/reference:System.Windows.Forms.dll', '/reference:System.Drawing.dll', '/reference:System.Web.Extensions.dll', '/reference:Microsoft.CSharp.dll')
     $resource = '/resource:' + (Join-Path $PSScriptRoot 'app.ico') + ',Connector.ico'
     if ($Audit) {

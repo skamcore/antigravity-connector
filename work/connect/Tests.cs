@@ -32,9 +32,10 @@ public static class Tests {
         string savedRoot=Store.Root;Store.Root=Path.Combine(Directory.GetCurrentDirectory(),"work","connect","test-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(Store.Root);
         try {
             string path=Path.Combine(Store.Root,"Ярлык с пробелами.lnk");
-            dynamic shell=Activator.CreateInstance(Type.GetTypeFromProgID("WScript.Shell"));dynamic original=shell.CreateShortcut(path);
+            using(var original=new Shortcut(path)) {
             original.TargetPath=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows),"notepad.exe");original.Arguments="original-profile";original.Save();
-            System.Runtime.InteropServices.Marshal.FinalReleaseComObject(original);System.Runtime.InteropServices.Marshal.FinalReleaseComObject(shell);
+            }
+            using(var unicodeLink=new Shortcut(path))Assert(unicodeLink.Arguments=="original-profile","Unicode shortcut path reopens correctly");
             byte[] before=File.ReadAllBytes(path);var records=new List<LinkBackup>();Setup.Link(path,"--launch","C:\\fake\\Antigravity.exe",records);
             Assert(!File.ReadAllBytes(path).SequenceEqual(before),"Shortcut installed");
             Setup.Link(path,"--launch","C:\\fake\\Antigravity.exe",records);Assert(records.Count==1,"Original shortcut backed up only once");
@@ -48,9 +49,9 @@ public static class Tests {
                 Directory.CreateDirectory(Setup.DesktopFolder);Directory.CreateDirectory(Setup.ProgramsFolder);
                 string oldLink=Path.Combine(Setup.DesktopFolder,"Antigravity.lnk");File.WriteAllBytes(oldLink,before);
                 string unrelated=Path.Combine(Setup.DesktopFolder,"Antigravity через Happ.lnk");
-                dynamic unrelatedShell=Activator.CreateInstance(Type.GetTypeFromProgID("WScript.Shell"));dynamic unrelatedLink=unrelatedShell.CreateShortcut(unrelated);
+                using(var unrelatedLink=new Shortcut(unrelated)) {
                 unrelatedLink.TargetPath=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows),"calc.exe");unrelatedLink.Save();
-                System.Runtime.InteropServices.Marshal.FinalReleaseComObject(unrelatedLink);System.Runtime.InteropServices.Marshal.FinalReleaseComObject(unrelatedShell);
+                }
                 byte[] unrelatedBefore=File.ReadAllBytes(unrelated);
                 string app=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows),"notepad.exe");
                 Setup.Install(new Options{Consent=true,Desktop=true,AllowTunnel=true,AppPath=app});

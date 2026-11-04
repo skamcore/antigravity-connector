@@ -5,6 +5,7 @@
 | File under work/connect | Responsibility |
 | --- | --- |
 | App.cs | Entry point, setup/rollback, shortcuts, settings UI and session lifetime |
+| Shortcut.cs | Unicode IShellLinkW / IPersistFile wrapper for locale-independent shortcut storage |
 | Core.cs | Proxy discovery, transport, TLS record handling, relay, health check, settings, binary preparation |
 | UI.cs | Custom rounded buttons, status panel and accessible checkbox rows |
 | I18n.cs | RU/EN text dictionary and dynamic status translation |
@@ -16,6 +17,8 @@
 | make_icon.py | Optional Pillow-based icon generator; not part of runtime/build |
 
 The compact layout is intentional: no service, browser extension, external daemon or package restore is needed. User-defined desktop/Start menu paths in tests are redirected away from the actual desktop.
+
+Shortcut storage uses Windows [IPersistFile](https://learn.microsoft.com/en-us/windows/win32/api/objidl/nn-objidl-ipersistfile) with IShellLinkW, rather than WScript.Shell's locale-sensitive save behavior. The compiler explicitly reads UTF-8 source.
 
 ## Launch flow
 

@@ -24,9 +24,7 @@ public static class Setup {
             Store.WriteAtomic(Manifest,new JavaScriptSerializer().Serialize(records));
         }
         Directory.CreateDirectory(Path.GetDirectoryName(path));
-        dynamic shell=Activator.CreateInstance(Type.GetTypeFromProgID("WScript.Shell"));dynamic link=shell.CreateShortcut(path);
-        try {link.TargetPath=Store.Exe;link.Arguments=args;link.WorkingDirectory=Store.Root;link.IconLocation=(args=="--settings"?Path.Combine(Store.Root,"connector-v4.ico"):app)+",0";link.Description=args=="--settings"?"Antigravity Connector — connection settings":L.Text("Antigravity с вашим VPN");link.Save();}
-        finally {System.Runtime.InteropServices.Marshal.FinalReleaseComObject(link);System.Runtime.InteropServices.Marshal.FinalReleaseComObject(shell);}
+        using(var link=new Shortcut(path)) {link.TargetPath=Store.Exe;link.Arguments=args;link.WorkingDirectory=Store.Root;link.SetIcon(args=="--settings"?Path.Combine(Store.Root,"connector-v4.ico"):app);link.Description=args=="--settings"?"Antigravity Connector — connection settings":L.Text("Antigravity с вашим VPN");link.Save();}
     }
     public static void Install(Options o) {
         if(!o.Consent)throw new IOException("Нужно разрешение на использование подключённого VPN.");
@@ -54,11 +52,11 @@ public static class Setup {
         foreach(string directory in new[]{desktop,programs,PinnedFolder}) {
             if(!Directory.Exists(directory))continue;
             foreach(string path in Directory.GetFiles(directory,"*.lnk",SearchOption.AllDirectories)) {
-                dynamic shell=Activator.CreateInstance(Type.GetTypeFromProgID("WScript.Shell"));dynamic l=shell.CreateShortcut(path);bool replace=false;
-                try {string target=Convert.ToString(l.TargetPath),args=Convert.ToString(l.Arguments);
+                bool replace=false;
+                using(var l=new Shortcut(path)) {string target=l.TargetPath,args=l.Arguments;
                     replace=String.Equals(target,o.AppPath,StringComparison.OrdinalIgnoreCase) && String.IsNullOrWhiteSpace(args);
                     if(Path.GetFileName(path)=="Antigravity через Happ.lnk" && String.Equals(target,Store.Exe,StringComparison.OrdinalIgnoreCase))replace=true;
-                }finally {System.Runtime.InteropServices.Marshal.FinalReleaseComObject(l);System.Runtime.InteropServices.Marshal.FinalReleaseComObject(shell);}
+                }
                 if(replace)update(path,"--launch");
             }
         }
@@ -91,17 +89,13 @@ public static class Setup {
     }
     static void RestoreSnapshot(string path,byte[] bytes){if(bytes==null){if(File.Exists(path))File.Delete(path);}else File.WriteAllBytes(path,bytes);}
     static bool IsOwnedLink(string path){
-        dynamic shell=Activator.CreateInstance(Type.GetTypeFromProgID("WScript.Shell"));dynamic link=shell.CreateShortcut(path);
-        try{return String.Equals(Convert.ToString(link.TargetPath),Store.Exe,StringComparison.OrdinalIgnoreCase);}
-        finally{System.Runtime.InteropServices.Marshal.FinalReleaseComObject(link);System.Runtime.InteropServices.Marshal.FinalReleaseComObject(shell);}
+        using(var link=new Shortcut(path))return String.Equals(link.TargetPath,Store.Exe,StringComparison.OrdinalIgnoreCase);
     }
     public static void Disable() {
         foreach(var r in Read()) {
             if(r.Removed && !File.Exists(r.Path)) {if(r.Existed)File.WriteAllBytes(r.Path,Convert.FromBase64String(r.Original));continue;}
             if(!File.Exists(r.Path))continue;
-            dynamic shell=Activator.CreateInstance(Type.GetTypeFromProgID("WScript.Shell"));dynamic l=shell.CreateShortcut(r.Path);bool ours;
-            try {ours=String.Equals(Convert.ToString(l.TargetPath),Store.Exe,StringComparison.OrdinalIgnoreCase);}
-            finally {System.Runtime.InteropServices.Marshal.FinalReleaseComObject(l);System.Runtime.InteropServices.Marshal.FinalReleaseComObject(shell);}
+            bool ours;using(var l=new Shortcut(r.Path))ours=String.Equals(l.TargetPath,Store.Exe,StringComparison.OrdinalIgnoreCase);
             if(!ours)continue;
             if(r.Existed)File.WriteAllBytes(r.Path,Convert.FromBase64String(r.Original));else File.Delete(r.Path);
         }
