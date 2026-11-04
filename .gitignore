@@ -1,0 +1,13 @@
+outputs/
+work/connect/audit/*.exe
+work/connect/audit/state/
+work/connect/test-*/
+work/connect/tests-result.txt
+*.pdb
+*.tmp
+settings.json
+shortcuts.json
+connection.log
+check-result.txt
+backups/
+legacy/
