@@ -11,7 +11,7 @@ namespace AntigravityConnect {
 public static class Tests {
     static void Assert(bool condition,string message){if(!condition)throw new Exception("TEST: "+message);}
     public static void Run() {
-        Assert(Net.Target("daily-cloudcode-pa.googleapis.com:443")=="www.google.com:443","Google gate route");
+        Assert(Net.Target("daily-cloudcode-pa.googleapis.com:443")=="daily-cloudcode-pa.googleapis.com:443","Preserve Google API destination through user VPN");
         Assert(Net.Target("daily-cloudcode-pa.googleapis.com.attacker.invalid:443")=="daily-cloudcode-pa.googleapis.com.attacker.invalid:443","Exact host match");
         Assert(Net.Target("cloudcode-pa.googleapis.com:80")=="cloudcode-pa.googleapis.com:80","Exact port match");
         byte[] patch=Encoding.ASCII.GetBytes("ineligible..ineligible!ineligibl");
@@ -28,6 +28,7 @@ public static class Tests {
         ProxyTest("http",false);ProxyTest("socks",false);ProxyTest("socks",true);
         Assert(Net.IsConnectSuccess("HTTP/1.1 200 Connection established\r\n\r\n"),"Valid CONNECT status");
         Assert(!Net.IsConnectSuccess("HTTP/1.1 2000 Invalid\r\n\r\n"),"Malformed CONNECT status rejected");
+        RelayDestinationTest();
         RelayLifecycleTest();
         string savedRoot=Store.Root;Store.Root=Path.Combine(Directory.GetCurrentDirectory(),"work","connect","test-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(Store.Root);
         try {
@@ -109,6 +110,22 @@ public static class Tests {
             }finally {Setup.DesktopFolder=oldDesktop;Setup.ProgramsFolder=oldPrograms;Setup.PinnedFolder=oldPinned;}
         }finally{Store.Root=savedRoot;}
         File.WriteAllText(Path.Combine(Directory.GetCurrentDirectory(),"work","connect","tests-result.txt"),"PASS: patch, TLS integrity, HTTP/SOCKS5 negotiation, strict CONNECT status, relay half-close/disposal, corrupt config recovery, install/disable and transactional manifest/settings rollback in isolated directories.");
+    }
+    static void RelayDestinationTest() {
+        var upstream=new TcpListener(IPAddress.Loopback,0);upstream.Start();
+        int port=((IPEndPoint)upstream.LocalEndpoint).Port;
+        var server=Task.Run(()=>{using(var c=upstream.AcceptTcpClient()) {
+            c.ReceiveTimeout=10000;var stream=c.GetStream();
+            Assert(Encoding.ASCII.GetString(Net.Header(stream)).StartsWith("CONNECT daily-cloudcode-pa.googleapis.com:443 HTTP/1.1"),"Relay preserves actual Google API CONNECT destination");
+            Net.Write(stream,"HTTP/1.1 200 OK\r\n\r\n");
+            byte[] payload=Net.Read(stream,7);Assert(payload.SequenceEqual(new byte[]{22,3,1,0,2,1,2}),"Relay preserves TLS bytes exactly");
+            Net.Write(stream,"OK");
+        }});
+        try {using(var relay=new Relay(new Route{Kind="http",Host="127.0.0.1",Port=port}))
+        using(var c=Net.Open(new Route{Kind="http",Host="127.0.0.1",Port=relay.Port},"daily-cloudcode-pa.googleapis.com:443")) {
+            var stream=c.GetStream();byte[] bytes={22,3,1,0,2,1,2};stream.Write(bytes,0,bytes.Length);
+            Assert(Encoding.ASCII.GetString(Net.Read(stream,2))=="OK","Unmodified tunnel response");Assert(server.Wait(10000),"Destination mock completed");
+        }}finally{upstream.Stop();}
     }
     static void RelayLifecycleTest() {
         var endpoint=new TcpListener(IPAddress.Loopback,0);endpoint.Start();int port=((IPEndPoint)endpoint.LocalEndpoint).Port;

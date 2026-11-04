@@ -1,6 +1,8 @@
+> v0.1.10: адреса назначения и TLS-байты теперь передаются без изменения. Описанная ниже подмена Google frontend относится только к старым версиям.
+
 # Antigravity Connector
 
-**by skam** · Windows · RU / EN · v0.1.9
+**by skam** · Windows · RU / EN · v0.1.10
 
 [English](README.md) · [Руководство пользователя](docs/manual.ru.md) · [Архитектура и разработка](docs/development.ru.md)
 

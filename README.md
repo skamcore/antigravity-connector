@@ -1,8 +1,10 @@
+> v0.1.10: destinations and TLS bytes now pass unchanged. Google frontend substitution described below applies only to older versions.
+
 # Antigravity Connector
 
-**by skam** · Windows · RU / EN · v0.1.9
+**by skam** В· Windows В· RU / EN В· v0.1.10
 
-[Русская документация](README.ru.md) · [English manual](docs/manual.en.md) · [Architecture and development](docs/development.en.md)
+[Р СѓСЃСЃРєР°СЏ РґРѕРєСѓРјРµРЅС‚Р°С†РёСЏ](README.ru.md) В· [English manual](docs/manual.en.md) В· [Architecture and development](docs/development.en.md)
 
 A small Windows launcher that starts Antigravity using your connected VPN's local HTTP/SOCKS5 proxy or a recognized system tunnel. One settings window, a persistent language button, and a desktop shortcut. No connector subscription, group key, or bundled VPN service.
 
@@ -19,7 +21,7 @@ The connector does not start your VPN. It needs to remain connected. Google sign
 
 ## What it changes
 
-The connector installs into your local application data, backs up and adjusts matching shortcuts, and starts a local relay on an ephemeral loopback port. It supplies proxy settings to the Antigravity process. For two specific Google hosts it changes the upstream destination and splits a TLS handshake record while preserving the original handshake bytes and certificate verification.
+The connector installs into your local application data, backs up and adjusts matching shortcuts, and starts a local relay on an ephemeral loopback port. It supplies proxy settings to the Antigravity process. The relay preserves destination hosts and TLS bytes. It does not substitute a Google frontend.
 
 It also modifies matching `ineligible` strings in Antigravity's `language_server.exe` / `agy.exe` to `inexigible`, with backups. **Disable restores shortcuts, but does not restore patched Antigravity binaries.** Reinstall Antigravity to return those files to a vendor-provided state. Read the [manual](docs/manual.en.md) before installation.
 

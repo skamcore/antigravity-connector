@@ -66,7 +66,7 @@ public static class Net {
     public static bool Gate(string authority) {
         return String.Equals(authority,"cloudcode-pa.googleapis.com:443",StringComparison.OrdinalIgnoreCase) || String.Equals(authority,"daily-cloudcode-pa.googleapis.com:443",StringComparison.OrdinalIgnoreCase);
     }
-    public static string Target(string authority) {return Gate(authority)?"www.google.com:443":authority;}
+    public static string Target(string authority) {return authority;}
     public static void Hello(Stream input,Stream output) {
         var h=Read(input,5);int len=h[3]*256+h[4];
         if(h[0]!=22 || h[1]!=3 || len<33 || len>16384) {output.Write(h,0,5);return;}
@@ -92,7 +92,7 @@ public sealed class Relay : IDisposable {
                 string[] first=header.Substring(0,end).Split(' ');if(first.Length!=3)throw new IOException("Неверный запрос прокси");
                 if(first[0]=="CONNECT") {
                     other=Net.Open(route,Net.Target(first[1]));Track(other);Net.Write(input,"HTTP/1.1 200 Connection established\r\n\r\n");
-                    if(Net.Gate(first[1]))Net.Hello(input,other.GetStream());
+                    // Preserve the VPN destination and TLS bytes without rewriting either.
                 }else {
                     var uri=new Uri(first[1]);if(uri.Scheme!="http")throw new IOException("Неподдерживаемый запрос");
                     if(route.Kind=="http")other=Net.Tcp(route.Host,route.Port,2500);

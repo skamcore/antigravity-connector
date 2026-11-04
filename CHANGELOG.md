@@ -1,3 +1,9 @@
+# v0.1.10 — 2026-11-04
+
+Preserve Google API destinations and TLS bytes through the user VPN. Added an upstream mock regression test.
+
+Сохранены исходные адреса Google API и TLS-байты через VPN. Добавлен тест upstream-прокси.
+
 # Changelog / История изменений
 
 ## 0.1.9 — 2026-11-04

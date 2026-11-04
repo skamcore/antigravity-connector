@@ -1,3 +1,5 @@
+> v0.1.10: destinations and TLS bytes now pass unchanged. Google frontend substitution described below applies only to older versions.
+
 # Architecture and development
 
 ## Source map
